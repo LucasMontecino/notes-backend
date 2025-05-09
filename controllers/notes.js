@@ -41,8 +41,8 @@ notesRouter.post('/', async (req, res, next) => {
   });
 
   try {
-    await note.save();
-    return res.status(201).json(note);
+    const savedNote = await note.save();
+    return res.status(201).json(savedNote);
   } catch (error) {
     next(error);
   }
@@ -58,8 +58,8 @@ notesRouter.put('/:id', async (req, res, next) => {
     note.content = content || note.content;
     note.important = important;
 
-    await note.save();
-    return res.json(note);
+    const updatedNote = await note.save();
+    return res.json(updatedNote);
   } catch (error) {
     next(error);
   }
