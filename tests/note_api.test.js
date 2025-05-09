@@ -10,10 +10,11 @@ const api = supertest(app);
 
 beforeEach(async () => {
   await Note.deleteMany({});
-  let noteObject = new Note(helper.initialNotes[0]);
-  await noteObject.save();
-  noteObject = new Note(helper.initialNotes[1]);
-  await noteObject.save();
+
+  for (const note of helper.initialNotes) {
+    const noteObject = new Note(note);
+    await noteObject.save();
+  }
 });
 
 test('notes are returned as json', async () => {
@@ -100,7 +101,6 @@ test('a note can be deleted', async () => {
     .expect(204);
 
   const notesAtEnd = await helper.notesInDb();
-
   const contents = notesAtEnd.map((n) => n.content);
   assert(!contents.includes('HTML is easy'));
 
