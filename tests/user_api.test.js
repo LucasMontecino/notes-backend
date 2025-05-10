@@ -8,7 +8,7 @@ const assert = require('node:assert');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const supertest = require('supertest');
-const helper = require('./user_test_helper');
+const helper = require('./test_helper.js');
 const mongoose = require('mongoose');
 
 const app = require('../app');
