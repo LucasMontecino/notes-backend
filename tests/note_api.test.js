@@ -10,6 +10,8 @@ const supertest = require('supertest');
 const app = require('../app');
 const Note = require('../models/note');
 const helper = require('./test_helper');
+const bcrypt = require('bcrypt');
+const User = require('../models/user');
 
 const api = supertest(app);
 
@@ -21,6 +23,19 @@ describe('when there is initially some notes saved', () => {
       const noteObject = new Note(note);
       await noteObject.save();
     }
+  });
+
+  beforeEach(async () => {
+    await User.deleteMany({});
+
+    const passwordHash = await bcrypt.hash('sekret', 10);
+
+    const user = new User({
+      username: 'root',
+      passwordHash,
+    });
+
+    await user.save();
   });
 
   test('notes are returned as json', async () => {
@@ -74,11 +89,17 @@ describe('when there is initially some notes saved', () => {
 
   describe('addition of a new note', () => {
     test('succeeds with valid data', async () => {
+      const users = await helper.usersInDb();
+
+      const userToView = users[0];
+
       const newNote = {
         content:
           'async/await simplifies making async calls',
         important: true,
+        userId: userToView.id,
       };
+
       await api
         .post('/api/notes')
         .send(newNote)
