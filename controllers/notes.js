@@ -1,6 +1,7 @@
 const notesRouter = require('express').Router();
 const Note = require('../models/note');
 const User = require('../models/user');
+const middleware = require('../utils/middleware');
 
 notesRouter.get('/', async (req, res) => {
   const notes = await Note.find({}).populate('user', {
@@ -29,9 +30,14 @@ notesRouter.delete('/:id', async (req, res) => {
 });
 
 notesRouter.post('/', async (req, res) => {
-  const { content, important, userId } = req.body;
+  const { content, important } = req.body;
 
-  const user = await User.findById(userId);
+  const decodedToken = middleware.getDecodedToken(req);
+
+  if (!decodedToken.id)
+    return res.status(401).json({ error: 'token invalid' });
+
+  const user = await User.findById(decodedToken.id);
 
   if (!user)
     return res
