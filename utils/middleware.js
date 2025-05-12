@@ -1,7 +1,29 @@
 const morgan = require('morgan');
 const logger = require('../utils/logger');
+const config = require('../utils/config');
+const jwt = require('jsonwebtoken');
 
 const requestLogger = morgan('dev');
+
+const getDecodedToken = (req) => {
+  const getTokenFrom = () => {
+    const authorization = req.get('authorization');
+    if (
+      authorization &&
+      authorization.startsWith('Bearer ')
+    ) {
+      return authorization.replace('Bearer ', '');
+    }
+    return null;
+  };
+
+  const decodedToken = jwt.verify(
+    getTokenFrom(),
+    config.SECRET
+  );
+
+  return decodedToken;
+};
 
 const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: 'unknown endpoint' });
@@ -23,6 +45,10 @@ const errorHandler = (error, req, res, next) => {
     return res
       .status(400)
       .json({ error: 'expected `username` to be unique' });
+  } else if (error.name === 'JsonWebTokenError') {
+    return res.status(401).json({ error: 'token invalid' });
+  } else if (error.name === 'TokenExpiredError') {
+    return res.status(401).json({ error: 'token expired' });
   }
 
   next(error);
@@ -32,4 +58,5 @@ module.exports = {
   requestLogger,
   errorHandler,
   unknownEndpoint,
+  getDecodedToken,
 };
