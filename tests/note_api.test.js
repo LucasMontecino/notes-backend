@@ -97,7 +97,7 @@ describe('when there is initially some notes saved', () => {
         content:
           'async/await simplifies making async calls',
         important: true,
-        userId: userToView.id,
+        userId: userToView._id,
       };
 
       await api
