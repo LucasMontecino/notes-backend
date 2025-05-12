@@ -1,8 +1,8 @@
 POST http://localhost:3001/api/notes
 Content-Type: application/json
 
+
 {
-    "content": "today's game",
+    "content": "get decoded jwt middleware",
     "important": true,
-    "userId": "681fb1ccf3de158a4feda929"
 }
