@@ -5,24 +5,31 @@ const jwt = require('jsonwebtoken');
 
 const requestLogger = morgan('dev');
 
-const getDecodedToken = (req) => {
-  const getTokenFrom = () => {
-    const authorization = req.get('authorization');
-    if (
-      authorization &&
-      authorization.startsWith('Bearer ')
-    ) {
-      return authorization.replace('Bearer ', '');
-    }
-    return null;
-  };
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization');
 
-  const decodedToken = jwt.verify(
-    getTokenFrom(),
-    config.SECRET
-  );
+  if (
+    authorization &&
+    authorization.startsWith('Bearer ')
+  ) {
+    req.token = authorization.replace('Bearer ', '');
+  } else {
+    req.token = null;
+  }
 
-  return decodedToken;
+  next();
+};
+
+const userExtractor = (req, res, next) => {
+  if (req.token) {
+    req.user = jwt.verify(req.token, config.SECRET);
+  } else {
+    return res
+      .status(401)
+      .json({ error: 'you must provide a token' });
+  }
+
+  next();
 };
 
 const unknownEndpoint = (req, res) => {
@@ -58,5 +65,6 @@ module.exports = {
   requestLogger,
   errorHandler,
   unknownEndpoint,
-  getDecodedToken,
+  tokenExtractor,
+  userExtractor,
 };
