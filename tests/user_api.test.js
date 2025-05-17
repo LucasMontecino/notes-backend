@@ -17,16 +17,25 @@ const api = supertest(app);
 
 describe('initially has one user in db', () => {
   beforeEach(async () => {
-    await User.deleteMany({});
-
     const passwordHash = await bcrypt.hash('sekret', 10);
+    const secondPasswordHash = await bcrypt.hash(
+      'salainen',
+      10
+    );
 
     const user = new User({
       username: 'root',
       passwordHash,
     });
 
+    const secondUser = new User({
+      username: 'mluukkai',
+      name: 'Matti Luukkainen',
+      passwordHash: secondPasswordHash,
+    });
+
     await user.save();
+    await secondUser.save();
   });
 
   describe('register new users', () => {
